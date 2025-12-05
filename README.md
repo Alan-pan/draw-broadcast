@@ -68,7 +68,7 @@ java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar
 可以通过指定不同的端口来启动多个实例：
 
 ```bash
-java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8081
+java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8082
 java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8082
 ```
 
@@ -83,7 +83,7 @@ docker build -t draw-app .
 运行容器：
 
 ```bash
-docker run -p 8081:8081 --name draw-app-container draw-app
+docker run -p 8082:8082 --name draw-app-container draw-app
 ```
 
 ### 7. 使用完整的Docker Compose部署
@@ -100,8 +100,8 @@ docker-compose up -d
 
 ### 8. 访问应用
 
-- Web界面: http://localhost:8081/
-- 健康检查: http://localhost:8081/health
+- Web界面: http://localhost:8082/
+- 健康检查: http://localhost:8082/health
 - WebSocket端点: /ws-draw
 - RabbitMQ管理界面: http://localhost:15672 (用户名/密码: guest/guest)
 
@@ -143,7 +143,7 @@ docker-compose up -d
 
 ## 前端界面
 
-访问 `http://localhost:8081/` 可以看到前端界面，具有以下功能：
+访问 `http://localhost:8082/` 可以看到前端界面，具有以下功能：
 
 1. 参与者管理（添加、查看、清空）
 2. 抽奖控制（设置中奖人数和奖品名称）
@@ -160,7 +160,7 @@ docker-compose up -d
 
 ```yaml
 server:
-  port: 8081  # 服务端口
+  port: 8082  # 服务端口
 
 spring:
   rabbitmq:
