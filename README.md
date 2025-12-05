@@ -55,14 +55,14 @@ java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar
 可以通过指定不同的端口来启动多个实例：
 
 ```bash
-java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8081
+java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8082
 java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8082
 ```
 
 ### 6. 访问应用
 
-- Web界面: http://localhost:8081/
-- 健康检查: http://localhost:8081/health
+- Web界面: http://localhost:8082/
+- 健康检查: http://localhost:8082/health
 - WebSocket端点: /ws-draw
 
 ## API接口文档
@@ -94,7 +94,7 @@ java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8082
 
 ## 前端界面
 
-访问 `http://localhost:8081/` 可以看到前端界面，具有以下功能：
+访问 `http://localhost:8082/` 可以看到前端界面，具有以下功能：
 
 1. 参与者管理（添加、查看、清空）
 2. 抽奖控制（设置中奖人数和奖品名称）
@@ -111,7 +111,7 @@ java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8082
 
 ```yaml
 server:
-  port: 8081  # 服务端口
+  port: 8082  # 服务端口
 
 spring:
   rabbitmq:

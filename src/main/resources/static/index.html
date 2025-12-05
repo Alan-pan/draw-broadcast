@@ -108,8 +108,8 @@
         let stompClient = null;
         
         function connect() {
-            // 更新WebSocket连接地址为8081端口
-            const socket = new SockJS('http://localhost:8081/ws-draw');
+            // 更新WebSocket连接地址为8082端口
+            const socket = new SockJS('http://localhost:8082/ws-draw');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function (frame) {
                 console.log('Connected: ' + frame);
@@ -133,7 +133,7 @@
         function addParticipant() {
             const name = document.getElementById('participantName').value;
             if (name) {
-                fetch('http://localhost:8081/api/draw/add-participant?name=' + encodeURIComponent(name), {
+                fetch('http://localhost:8082/api/draw/add-participant?name=' + encodeURIComponent(name), {
                     method: 'POST'
                 }).then(response => {
                     if (response.ok) {
@@ -147,7 +147,7 @@
         }
         
         function loadParticipants() {
-            fetch('http://localhost:8081/api/draw/participants')
+            fetch('http://localhost:8082/api/draw/participants')
                 .then(response => response.json())
                 .then(data => {
                     const listDiv = document.getElementById('participantsList');
@@ -168,7 +168,7 @@
         
         function clearParticipants() {
             if (confirm('确定要清空所有参与者吗？')) {
-                fetch('http://localhost:8081/api/draw/clear', {
+                fetch('http://localhost:8082/api/draw/clear', {
                     method: 'POST'
                 }).then(response => {
                     if (response.ok) {
@@ -182,7 +182,7 @@
             const winnerCount = document.getElementById('winnerCount').value || 1;
             const prizeName = document.getElementById('prizeName').value || '大奖';
             
-            fetch(`http://localhost:8081/api/draw/start?winnerCount=${winnerCount}&prizeName=${encodeURIComponent(prizeName)}`, {
+            fetch(`http://localhost:8082/api/draw/start?winnerCount=${winnerCount}&prizeName=${encodeURIComponent(prizeName)}`, {
                 method: 'POST'
             }).then(response => {
                 if (response.ok) {
@@ -198,7 +198,7 @@
             const prizeName = document.getElementById('manualPrizeName').value;
             
             if (userName && prizeName) {
-                fetch(`http://localhost:8081/api/draw/announce?userName=${encodeURIComponent(userName)}&prizeName=${encodeURIComponent(prizeName)}`, {
+                fetch(`http://localhost:8082/api/draw/announce?userName=${encodeURIComponent(userName)}&prizeName=${encodeURIComponent(prizeName)}`, {
                     method: 'POST'
                 }).then(response => {
                     if (response.ok) {

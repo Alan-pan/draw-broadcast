@@ -20,22 +20,6 @@ services:
       - draw-network
     restart: unless-stopped
 
-  app:
-    build: .
-    container_name: draw-app
-    ports:
-      - "8081:8081"
-    depends_on:
-      - rabbitmq
-    environment:
-      SPRING_RABBITMQ_HOST: rabbitmq
-      SPRING_RABBITMQ_PORT: 5672
-      SPRING_RABBITMQ_USERNAME: guest
-      SPRING_RABBITMQ_PASSWORD: guest
-    networks:
-      - draw-network
-    restart: unless-stopped
-
 volumes:
   rabbitmq_data:
 

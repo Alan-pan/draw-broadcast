@@ -13,8 +13,8 @@ public class RealtimeDrawBroadcastApplication {
         // 启动 Spring Boot 应用
         SpringApplication.run(RealtimeDrawBroadcastApplication.class, args);
         System.out.println("====== 实时抽奖广播服务已启动 ======");
-        System.out.println("访问地址: http://localhost:8081/");
-        System.out.println("健康检查: http://localhost:8081/health");
+        System.out.println("访问地址: http://localhost:8082/");
+        System.out.println("健康检查: http://localhost:8082/health");
         System.out.println("WebSocket端点: /ws-draw");
     }
 

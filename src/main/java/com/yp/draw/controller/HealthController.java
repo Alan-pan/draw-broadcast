@@ -12,7 +12,7 @@ public class HealthController {
 
     /**
      * 用于检查服务是否成功启动
-     * 访问地址: http://localhost:8081/health
+     * 访问地址: http://localhost:8082/health
      */
     @GetMapping("/health")
     public String checkHealth() {

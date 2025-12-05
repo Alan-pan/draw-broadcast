@@ -2,6 +2,8 @@
 package com.yp.draw.service;
 
 import com.yp.draw.entity.WinnerMessage;
+import jakarta.annotation.Resource;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,9 @@ public class DrawBroadcastService {
     // SimpMessagingTemplate 是 Spring 提供的工具，用于向 STOMP 客户端发送消息
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     // 定义广播给所有客户端的订阅通道
     private static final String ANNOUNCEMENT_TOPIC = "/topic/announcements";
@@ -25,9 +30,9 @@ public class DrawBroadcastService {
         
         // 使用 convertAndSend 将消息发送到指定的目的地
         // 所有订阅了 /topic/announcements 的客户端都会收到这条消息
-        messagingTemplate.convertAndSend(ANNOUNCEMENT_TOPIC, announcementText);
-        
-        System.out.println("[WebSocket Broadcast] Sent: " + announcementText);
+//        messagingTemplate.convertAndSend(ANNOUNCEMENT_TOPIC, announcementText);
+//        rabbitTemplate.send(announcementText);
+        System.out.println("[Mock Send Broadcast] Sent: " + announcementText);
     }
     
     /**
