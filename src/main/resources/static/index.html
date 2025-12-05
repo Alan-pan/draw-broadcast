@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>实时抽奖广播系统</title>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .announcement { 
+            background: #e8f5e8; 
+            border: 1px solid #4CAF50; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        button { 
+            padding: 10px 15px; 
+            margin: 5px; 
+            background-color: #4CAF50; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer;
+        }
+        button:hover { background-color: #45a049; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        input, select { 
+            padding: 8px; 
+            margin: 5px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px;
+        }
+        .section { 
+            border: 1px solid #ddd; 
+            padding: 15px; 
+            margin: 15px 0; 
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        h1 { color: #333; text-align: center; }
+        h2 { color: #4CAF50; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .participants-list { 
+            max-height: 200px; 
+            overflow-y: auto; 
+            border: 1px solid #ddd; 
+            padding: 10px; 
+            background-color: white;
+            margin-top: 10px;
+        }
+        .participant-item { 
+            padding: 5px; 
+            border-bottom: 1px solid #eee;
+        }
+        .participant-item:last-child { border-bottom: none; }
+        .controls { display: flex; align-items: center; flex-wrap: wrap; }
+        .controls > * { margin: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 实时抽奖广播系统</h1>
+        
+        <div class="section">
+            <h2>参与者管理</h2>
+            <div class="controls">
+                <input type="text" id="participantName" placeholder="输入参与者姓名">
+                <button onclick="addParticipant()">添加参与者</button>
+                <button onclick="clearParticipants()">清空参与者</button>
+                <button onclick="loadParticipants()">刷新列表</button>
+            </div>
+            <div id="participantsList" class="participants-list">
+                <div>暂无参与者</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>抽奖控制</h2>
+            <div class="controls">
+                <input type="number" id="winnerCount" placeholder="中奖人数" value="1" min="1" max="100">
+                <input type="text" id="prizeName" placeholder="奖品名称" value="神秘大奖">
+                <button onclick="startDraw()">开始抽奖</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>手动发布公告</h2>
+            <div class="controls">
+                <input type="text" id="manualUserName" placeholder="用户名">
+                <input type="text" id="manualPrizeName" placeholder="奖品名称">
+                <button onclick="announceWinner()">发布中奖公告</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>中奖公告</h2>
+            <div id="announcements"></div>
+        </div>
+    </div>
+
+    <script>
+        let stompClient = null;
+        
+        function connect() {
+            // 更新WebSocket连接地址为8081端口
+            const socket = new SockJS('http://localhost:8081/ws-draw');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/topic/announcements', function (message) {
+                    showAnnouncement(message.body);
+                });
+                
+                // 页面加载完成后获取参与者列表
+                loadParticipants();
+            });
+        }
+        
+        function showAnnouncement(message) {
+            const announcementsDiv = document.getElementById('announcements');
+            const announcementDiv = document.createElement('div');
+            announcementDiv.className = 'announcement';
+            announcementDiv.innerHTML = '<strong>' + new Date().toLocaleString() + '</strong>: ' + message;
+            announcementsDiv.insertBefore(announcementDiv, announcementsDiv.firstChild);
+        }
+        
+        function addParticipant() {
+            const name = document.getElementById('participantName').value;
+            if (name) {
+                fetch('http://localhost:8081/api/draw/add-participant?name=' + encodeURIComponent(name), {
+                    method: 'POST'
+                }).then(response => {
+                    if (response.ok) {
+                        document.getElementById('participantName').value = '';
+                        loadParticipants(); // 刷新参与者列表
+                    } else {
+                        alert('添加参与者失败');
+                    }
+                });
+            }
+        }
+        
+        function loadParticipants() {
+            fetch('http://localhost:8081/api/draw/participants')
+                .then(response => response.json())
+                .then(data => {
+                    const listDiv = document.getElementById('participantsList');
+                    if (data.length === 0) {
+                        listDiv.innerHTML = '<div>暂无参与者</div>';
+                        return;
+                    }
+                    
+                    listDiv.innerHTML = '';
+                    data.forEach(participant => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'participant-item';
+                        itemDiv.textContent = participant;
+                        listDiv.appendChild(itemDiv);
+                    });
+                });
+        }
+        
+        function clearParticipants() {
+            if (confirm('确定要清空所有参与者吗？')) {
+                fetch('http://localhost:8081/api/draw/clear', {
+                    method: 'POST'
+                }).then(response => {
+                    if (response.ok) {
+                        loadParticipants();
+                    }
+                });
+            }
+        }
+        
+        function startDraw() {
+            const winnerCount = document.getElementById('winnerCount').value || 1;
+            const prizeName = document.getElementById('prizeName').value || '大奖';
+            
+            fetch(`http://localhost:8081/api/draw/start?winnerCount=${winnerCount}&prizeName=${encodeURIComponent(prizeName)}`, {
+                method: 'POST'
+            }).then(response => {
+                if (response.ok) {
+                    console.log('抽奖完成');
+                } else {
+                    alert('抽奖失败: ' + response.text());
+                }
+            });
+        }
+        
+        function announceWinner() {
+            const userName = document.getElementById('manualUserName').value;
+            const prizeName = document.getElementById('manualPrizeName').value;
+            
+            if (userName && prizeName) {
+                fetch(`http://localhost:8081/api/draw/announce?userName=${encodeURIComponent(userName)}&prizeName=${encodeURIComponent(prizeName)}`, {
+                    method: 'POST'
+                }).then(response => {
+                    if (response.ok) {
+                        document.getElementById('manualUserName').value = '';
+                        document.getElementById('manualPrizeName').value = '';
+                        console.log('手动公告已发送');
+                    } else {
+                        alert('发送公告失败');
+                    }
+                });
+            }
+        }
+        
+        window.onload = function() {
+            connect();
+        };
+    </script>
+</body>
+</html>
