@@ -12,6 +12,10 @@ spring:
     port: 5672
     username: guest
     password: guest
+    listener:
+      simple:
+        concurrency: 1
+        max-concurrency: 10
 
 logging:
   level:
@@ -22,3 +26,7 @@ logging:
 websocket:
   endpoint: /ws-draw
   topic-prefix: /topic
+
+draw:
+  queue:
+    name: draw.queue.2025

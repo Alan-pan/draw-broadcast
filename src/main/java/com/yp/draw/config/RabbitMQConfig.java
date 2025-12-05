@@ -5,6 +5,7 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     public static final String DRAW_FANOUT_EXCHANGE = "draw.fanout";
-    public static final String DRAW_QUEUE_PREFIX = "draw.queue.";
-
+    @Value("${draw.queue.name}")
+    public String queueName;
     /**
      * 创建Fanout交换机
      */
@@ -28,7 +29,7 @@ public class RabbitMQConfig {
     @Bean
     public Queue drawQueue() {
         // 每个应用实例创建唯一的队列
-        return new Queue(DRAW_QUEUE_PREFIX + java.util.UUID.randomUUID().toString(), false);
+        return new Queue(queueName);
     }
 
     /**

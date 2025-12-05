@@ -1,10 +1,12 @@
 // File: RealtimeDrawBroadcastApplication.java
 package com.yp.draw;
 
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication // 核心注解，启动自动配置和组件扫描
+@EnableRabbit // 启用RabbitMQ支持
 public class RealtimeDrawBroadcastApplication {
 
     public static void main(String[] args) {
