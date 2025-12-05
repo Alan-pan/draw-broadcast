@@ -2,6 +2,7 @@ package com.yp.draw.config;
 
 import com.yp.draw.entity.WinnerMessage;
 import com.yp.draw.service.DrawBroadcastService;
+import com.yp.draw.service.MQProducerService;
 import jakarta.annotation.Resource;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class MockDrawRunner implements ApplicationRunner {
 
     @Autowired
-    private DrawBroadcastService broadcastService;
+    private MQProducerService producerService;
 
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
@@ -48,7 +49,7 @@ public class MockDrawRunner implements ApplicationRunner {
         msg.setTimestamp(new Timestamp(System.currentTimeMillis()));
         
         // 触发广播
-        broadcastService.broadcastWinner(msg);
+        producerService.sendWinnerMessage(msg);
         counter++;
     }
     

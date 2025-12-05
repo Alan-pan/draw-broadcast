@@ -30,8 +30,7 @@ public class DrawBroadcastService {
         
         // 使用 convertAndSend 将消息发送到指定的目的地
         // 所有订阅了 /topic/announcements 的客户端都会收到这条消息
-//        messagingTemplate.convertAndSend(ANNOUNCEMENT_TOPIC, announcementText);
-//        rabbitTemplate.send(announcementText);
+        messagingTemplate.convertAndSend(ANNOUNCEMENT_TOPIC, announcementText);
         System.out.println("[Mock Send Broadcast] Sent: " + announcementText);
     }
     
