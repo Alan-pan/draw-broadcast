@@ -1,5 +1,6 @@
 package com.yp.draw.service;
 
+import com.yp.draw.config.RabbitMQConfig;
 import com.yp.draw.entity.WinnerMessage;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,9 @@ public class MQMessageListener {
     /**
      * 监听中奖消息并广播给本地WebSocket客户端
      */
-    @RabbitListener(queues = "${draw.queue.name}")
-    public void handleMessage(Object message) {
-        System.out.println("[MQ Consumer] Received message: " + message);
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_A)
+    public void handleMessageA(Object message) {
+        System.out.println("[MQ ConsumerA] Received message: " + message);
         if (message instanceof WinnerMessage) {
             drawBroadcastService.broadcastWinner((WinnerMessage) message);
         } else if (message instanceof String) {
@@ -24,5 +25,29 @@ public class MQMessageListener {
         } else {
             drawBroadcastService.broadcastText("未知消息类型: " + message.toString());
         }
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_B)
+    public void handleMessageB(Object message) {
+        System.out.println("[MQ ConsumerB] Received message: " + message);
+//        if (message instanceof WinnerMessage) {
+//            drawBroadcastService.broadcastWinner((WinnerMessage) message);
+//        } else if (message instanceof String) {
+//            drawBroadcastService.broadcastSystemNotice((String) message);
+//        } else {
+//            drawBroadcastService.broadcastText("未知消息类型: " + message.toString());
+//        }
+    }
+
+    @RabbitListener(queues = RabbitMQConfig.QUEUE_C)
+    public void handleMessageC(Object message) {
+        System.out.println("[MQ ConsumerC] Received message: " + message);
+//        if (message instanceof WinnerMessage) {
+//            drawBroadcastService.broadcastWinner((WinnerMessage) message);
+//        } else if (message instanceof String) {
+//            drawBroadcastService.broadcastSystemNotice((String) message);
+//        } else {
+//            drawBroadcastService.broadcastText("未知消息类型: " + message.toString());
+//        }
     }
 }

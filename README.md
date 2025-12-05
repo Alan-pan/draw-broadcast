@@ -11,6 +11,7 @@
 5. **RESTful API**：提供完整的API接口供外部调用
 6. **系统监控**：提供系统状态查询和管理接口
 7. **多节点支持**：通过RabbitMQ实现多节点部署，确保消息在整个集群中同步
+8. **模拟数据**：定时生成模拟抽奖数据并通过MQ传递到WebSocket
 
 ## 技术栈
 
@@ -28,7 +29,19 @@
 git clone <项目地址>
 ```
 
-### 2. 安装并启动RabbitMQ
+### 2. 启动RabbitMQ服务
+
+有两种方式启动RabbitMQ服务：
+
+#### 方式一：使用Docker Compose（推荐）
+
+项目提供了[docker-compose.yml](file:///D:/ideaProjects/realtime-draw-broadcast/docker-compose.yml)文件，可以直接使用Docker Compose启动RabbitMQ：
+
+```bash
+docker-compose up -d
+```
+
+#### 方式二：手动安装
 
 确保已安装并运行RabbitMQ服务器，默认端口为5672，管理界面端口为15672。
 
@@ -55,15 +68,51 @@ java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar
 可以通过指定不同的端口来启动多个实例：
 
 ```bash
-java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8082
+java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8081
 java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8082
 ```
 
-### 6. 访问应用
+### 6. 使用Docker运行应用
 
-- Web界面: http://localhost:8082/
-- 健康检查: http://localhost:8082/health
+构建Docker镜像：
+
+```bash
+docker build -t draw-app .
+```
+
+运行容器：
+
+```bash
+docker run -p 8081:8081 --name draw-app-container draw-app
+```
+
+### 7. 使用完整的Docker Compose部署
+
+项目提供了完整的[docker-compose.yml](file:///D:/ideaProjects/realtime-draw-broadcast/docker-compose.yml)文件，可以一键部署整个应用和RabbitMQ：
+
+```bash
+docker-compose up -d
+```
+
+这将启动两个容器：
+1. RabbitMQ服务（包含管理界面）
+2. 应用程序服务
+
+### 8. 访问应用
+
+- Web界面: http://localhost:8081/
+- 健康检查: http://localhost:8081/health
 - WebSocket端点: /ws-draw
+- RabbitMQ管理界面: http://localhost:15672 (用户名/密码: guest/guest)
+
+## 工作流程
+
+系统工作流程如下：
+
+1. **模拟数据生成**：[MockDrawRunner](file:///D:/ideaProjects/realtime-draw-broadcast/src/main/java/com/yp/draw/config/MockDrawRunner.java)定时生成模拟的抽奖数据
+2. **发送到MQ**：模拟数据通过[MQProducerService](file:///D:/ideaProjects/realtime-draw-broadcast/src/main/java/com/yp/draw/service/MQProducerService.java)发送到RabbitMQ的Fanout交换机
+3. **MQ监听**：[MQMessageListener](file:///D:/ideaProjects/realtime-draw-broadcast/src/main/java/com/yp/draw/service/MQMessageListener.java)监听队列中的消息
+4. **WebSocket广播**：监听到的消息通过[DrawBroadcastService](file:///D:/ideaProjects/realtime-draw-broadcast/src/main/java/com/yp/draw/service/DrawBroadcastService.java)广播给所有连接的WebSocket客户端
 
 ## API接口文档
 
@@ -94,7 +143,7 @@ java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8082
 
 ## 前端界面
 
-访问 `http://localhost:8082/` 可以看到前端界面，具有以下功能：
+访问 `http://localhost:8081/` 可以看到前端界面，具有以下功能：
 
 1. 参与者管理（添加、查看、清空）
 2. 抽奖控制（设置中奖人数和奖品名称）
@@ -111,7 +160,7 @@ java -jar target/realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=8082
 
 ```yaml
 server:
-  port: 8082  # 服务端口
+  port: 8081  # 服务端口
 
 spring:
   rabbitmq:
@@ -161,13 +210,34 @@ websocket:
 
 ## 部署说明
 
-1. 安装并启动RabbitMQ服务器
+1. 安装并启动RabbitMQ服务器（推荐使用docker-compose）
 2. 构建项目：`mvn clean package`
 3. 将生成的jar包部署到多台服务器
 4. 分别在各台服务器上运行：
    ```bash
    java -jar realtime-draw-broadcast-0.0.1-SNAPSHOT.jar --server.port=[端口号]
    ```
+
+## Docker部署
+
+1. 构建Docker镜像：
+   ```bash
+   docker build -t draw-app .
+   ```
+   
+2. 使用Docker Compose一键部署：
+   ```bash
+   docker-compose up -d
+   ```
+
+## 修复说明
+
+在最新的更新中，我们修复了以下关键问题：
+
+1. **MQ监听器队列引用问题**：修复了MQ消息监听器无法正确引用队列名称的问题，现在使用配置文件中的属性来定义队列名称。
+2. **多节点消息同步**：确保每个应用实例都有唯一的队列名称，通过Fanout交换机实现消息在所有节点间的广播。
+3. **完整工作流**：建立了从模拟数据生成->MQ->监听->WebSocket广播的完整工作流程。
+4. **消息类型识别问题**：修复了MQ监听器无法正确识别WinnerMessage类型的问题，通过使用@RabbitHandler注解和设置可信包来确保正确的消息反序列化。
 
 ## 开发说明
 

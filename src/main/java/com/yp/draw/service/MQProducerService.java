@@ -16,7 +16,7 @@ public class MQProducerService {
      * 发送中奖消息到MQ
      */
     public void sendWinnerMessage(WinnerMessage winnerMessage) {
-        rabbitTemplate.convertAndSend(RabbitMQConfig.DRAW_FANOUT_EXCHANGE, "", winnerMessage);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FANOUT_EXCHANGE, "", winnerMessage);
         System.out.println("[MQ Producer] Sent winner message: " + winnerMessage);
     }
 
@@ -24,7 +24,7 @@ public class MQProducerService {
      * 发送系统通知到MQ
      */
     public void sendSystemNotice(String notice) {
-        rabbitTemplate.convertAndSend(RabbitMQConfig.DRAW_FANOUT_EXCHANGE, "", notice);
+        rabbitTemplate.convertAndSend(RabbitMQConfig.FANOUT_EXCHANGE, "", notice);
         System.out.println("[MQ Producer] Sent system notice: " + notice);
     }
 }

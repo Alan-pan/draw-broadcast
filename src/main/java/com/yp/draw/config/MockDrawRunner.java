@@ -1,10 +1,7 @@
 package com.yp.draw.config;
 
 import com.yp.draw.entity.WinnerMessage;
-import com.yp.draw.service.DrawBroadcastService;
 import com.yp.draw.service.MQProducerService;
-import jakarta.annotation.Resource;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
